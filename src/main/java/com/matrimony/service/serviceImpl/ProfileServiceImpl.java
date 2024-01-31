@@ -1,11 +1,13 @@
 package com.matrimony.service.serviceImpl;
 
 import com.matrimony.entity.Profile;
+import com.matrimony.entity.Slider;
 import com.matrimony.repository.ProfileRepository;
 import com.matrimony.repository.UserRepository;
 import com.matrimony.request.SearchPaginationRequest;
 import com.matrimony.response.ApiResponse;
 import com.matrimony.service.ProfileService;
+import com.matrimony.validator.ProfileValidation;
 import jakarta.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +43,63 @@ public class ProfileServiceImpl implements ProfileService {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
-    public ResponseEntity<ApiResponse<Profile>> createProfile(Profile profileRequest) {
+    public ResponseEntity<ApiResponse<Profile>> createProfile(ProfileValidation profileRequest) {
         try {
-            Profile payload = this.profileRepository.save(profileRequest);
+            Profile profile = new Profile();
+            profile.setFatherName(profileRequest.getFatherName());
+            profile.setMotherName(profileRequest.getMotherName());
+            profile.setFacebookUrl(profileRequest.getFacebookUrl());
+            profile.setWhatsappUrl(profileRequest.getWhatsappUrl());
+            profile.setLinkedinUrl(profileRequest.getLinkedinUrl());
+            profile.setCreatedBy(profileRequest.getCreatedBy());
+            profile.setPhoto1(profileRequest.getPhoto1());
+            profile.setPhoto2(profileRequest.getPhoto2());
+            profile.setPhoto3(profileRequest.getPhoto3());
+            profile.setAstroprofile(profileRequest.getAstroprofile());
+            profile.setNakshatra(profileRequest.getNakshatra());
+            profile.setRasi(profileRequest.getRasi());
+            profile.setMaritalStatus(profileRequest.getMaritalStatus());
+            profile.setHaveChildren(profileRequest.getHaveChildren());
+            profile.setNumberOfChildren(profileRequest.getNumberOfChildren());
+            profile.setWeight(profileRequest.getWeight());
+            profile.setHeight(profileRequest.getHeight());
+            profile.setBodyType(profileRequest.getBodyType());
+            profile.setNickName(profileRequest.getNickName());
+            profile.setComplexion(profileRequest.getComplexion());
+            profile.setReligion(profileRequest.getReligion());
+            profile.setSpecialCases(profileRequest.getSpecialCases());
+            profile.setMotherTongue(profileRequest.getMotherTongue());
+            profile.setCaste(profileRequest.getCaste());
+            profile.setSubCaste(profileRequest.getSubCaste());
+            profile.setManglik(profileRequest.getManglik());
+            profile.setBodyType(profileRequest.getBodyType());
+            profile.setFamilyValues(profileRequest.getFamilyValues());
+            profile.setBloodGroup(profileRequest.getBloodGroup());
+            profile.setAnnualIncome(profileRequest.getAnnualIncome());
+            profile.setCompanyName(profileRequest.getCompanyName());
+            profile.setNumberOfBrother(profileRequest.getNumberOfBrother());
+            profile.setNumberOfSister(profileRequest.getNumberOfSister());
+            profile.setContactPersonName(profileRequest.getContactPersonName());
+            profile.setContactPersonRelationShip(profileRequest.getContactPersonRelationShip());
+            profile.setContactPersonPhoneNumber(profileRequest.getContactPersonPhoneNumber());
+            profile.setConvenientCallTime(profileRequest.getConvenientCallTime());
+            profile.setPlaceOfBirth(profileRequest.getPlaceOfBirth());
+            profile.setTimeOFBirth(profileRequest.getTimeOFBirth());
+            profile.setHobbies(profileRequest.getHobbies());
+            profile.setInterests(profileRequest.getInterests());
+            profile.setFavoriteReads(profileRequest.getFavoriteReads());
+            profile.setPreferredMovies(profileRequest.getPreferredMovies());
+            profile.setSports(profileRequest.getSports());
+            profile.setFavoriteCuisine(profileRequest.getFavoriteCuisine());
+            profile.setSpokenLanguages(profileRequest.getSpokenLanguages());
+            profile.setEducation(profileRequest.getEducation());
+            profile.setProfession(profileRequest.getProfession());
+            profile.setDiet(profileRequest.getDiet());
+            profile.setAboutYourself(profileRequest.getAboutYourself());
+            profile.setDateOfMarriage(profileRequest.getDateOfMarriage());
+            profile.setUser(profileRequest.getUser());
+
+            Profile payload = this.profileRepository.save(profile);
             return ResponseEntity.ok(new ApiResponse<>("success", "Profile added successfully", payload, 200));
         } catch (Exception e) {
             // Handle the exception here and log it
@@ -59,6 +115,7 @@ public class ProfileServiceImpl implements ProfileService {
         try {
             Long id = searchParams.getId();
             String religion = searchParams.getReligion();
+            String caste = searchParams.getCaste();
             Integer perPageRecord = searchParams.getPer_page_record();
 
             // Set the default value of page to 1
@@ -77,6 +134,9 @@ public class ProfileServiceImpl implements ProfileService {
             }
             else if (religion != null) {
                 categoryPage = profileRepository.findByReligionContaining(religion, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (caste != null) {
+                categoryPage = profileRepository.findByCasteContaining(caste, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
             else {
                 categoryPage = profileRepository.findAll(PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
@@ -103,7 +163,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Profile>> updateProfile(Long profileId, Profile profileRequest) {
+    public ResponseEntity<ApiResponse<Profile>> updateProfile(Long profileId, ProfileValidation profileRequest) {
         try {
             Optional<Profile> existingProfile = this.profileRepository.findById(profileId);
 
@@ -116,10 +176,12 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedProfile.setFacebookUrl(profileRequest.getFacebookUrl());
                 updatedProfile.setWhatsappUrl(profileRequest.getWhatsappUrl());
                 updatedProfile.setLinkedinUrl(profileRequest.getLinkedinUrl());
+                updatedProfile.setCompanyName(profileRequest.getCompanyName());
                 updatedProfile.setCreatedBy(profileRequest.getCreatedBy());
                 updatedProfile.setPhoto1(profileRequest.getPhoto1());
                 updatedProfile.setPhoto2(profileRequest.getPhoto2());
                 updatedProfile.setPhoto3(profileRequest.getPhoto3());
+                updatedProfile.setNickName(profileRequest.getNickName());
                 updatedProfile.setAstroprofile(profileRequest.getAstroprofile());
                 updatedProfile.setNakshatra(profileRequest.getNakshatra());
                 updatedProfile.setRasi(profileRequest.getRasi());
@@ -143,6 +205,7 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedProfile.setNumberOfBrother(profileRequest.getNumberOfBrother());
                 updatedProfile.setNumberOfSister(profileRequest.getNumberOfSister());
                 updatedProfile.setContactPersonName(profileRequest.getContactPersonName());
+                updatedProfile.setContactPersonPhoneNumber(profileRequest.getContactPersonPhoneNumber());
                 updatedProfile.setContactPersonRelationShip(profileRequest.getContactPersonRelationShip());
                 updatedProfile.setConvenientCallTime(profileRequest.getConvenientCallTime());
                 updatedProfile.setPlaceOfBirth(profileRequest.getPlaceOfBirth());
@@ -159,6 +222,7 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedProfile.setDiet(profileRequest.getDiet());
                 updatedProfile.setAboutYourself(profileRequest.getAboutYourself());
                 updatedProfile.setDateOfMarriage(profileRequest.getDateOfMarriage());
+                updatedProfile.setUser(profileRequest.getUser());
                 Profile payload = this.profileRepository.save(updatedProfile);
                 return ResponseEntity.ok(new ApiResponse<>("success", "Data updated successfully", payload, 200));
             } else {

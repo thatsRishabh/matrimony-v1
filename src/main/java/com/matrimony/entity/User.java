@@ -49,6 +49,8 @@ public class User {
     @Column(name = "address")
     private String address;
 
+    private String resetOtp;
+
     @Column(name = "gender", columnDefinition = "INT COMMENT '1: male, 2: female'")
     private int gender;
 
@@ -59,6 +61,10 @@ public class User {
     @Column(name = "date_of_birth")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ", timezone = "UTC")
     private Date dateOfBirth;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String fcmToken;
 
     @ManyToOne
     @JsonIgnore

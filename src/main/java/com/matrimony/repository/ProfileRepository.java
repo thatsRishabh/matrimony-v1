@@ -12,5 +12,6 @@ import java.util.Optional;
 
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
     public Page<Profile> findByReligionContaining(String religion, Pageable pageable);
+    public Page<Profile> findByCasteContaining(String caste, Pageable pageable);
     public Optional<Profile> findByUserId(int id);
 }

@@ -4,7 +4,6 @@ import com.matrimony.authentication.CustomUserDetails;
 import com.matrimony.authentication.CustomUserService;
 import com.matrimony.authentication.JwtUtil;
 import com.matrimony.entity.FriendRequest;
-import com.matrimony.entity.Menu;
 import com.matrimony.entity.Profile;
 import com.matrimony.entity.User;
 import com.matrimony.exception.DeactivatedUserException;
@@ -18,7 +17,6 @@ import com.matrimony.response.ApiResponse;
 import com.matrimony.response.LoginResponse;
 import com.matrimony.response.UserFriendRequestResponse;
 import com.matrimony.service.UserService;
-import com.matrimony.util.ParentChildResponse;
 import com.matrimony.validator.UserValidation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +64,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Bean
+    BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Override
     public ResponseEntity<ApiResponse<User>> createUser(UserValidation userRequest) {
        try {
@@ -102,6 +105,7 @@ public class UserServiceImpl implements UserService {
             user.setSubscriptionType(userRequest.getSubscriptionType());
             user.setDateOfBirth(userRequest.getDateOfBirth());
             user.setRole(userRequest.getRole());
+
             String password = userRequest.getPassword();
             BCryptPasswordEncoder encoder = this.bCryptPasswordEncoder();
             String encodedPassword = encoder.encode(password);
@@ -136,6 +140,8 @@ public class UserServiceImpl implements UserService {
                 updatedUser.setSubscriptionType(userRequest.getSubscriptionType());
                 updatedUser.setDateOfBirth(userRequest.getDateOfBirth());
                 updatedUser.setRole(userRequest.getRole());
+//                encoding of password
+
                 String password = userRequest.getPassword();
                 BCryptPasswordEncoder encoder = this.bCryptPasswordEncoder();
                 String encodedPassword = encoder.encode(password);
@@ -280,6 +286,12 @@ public class UserServiceImpl implements UserService {
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
             CustomUserDetails userDetails = this.userDetailsService.loadUserByUsername(loginRequest.getEmail());
+
+//            saving FCM token
+            User userFCMToken = userRepository.findByEmailAddress(loginRequest.getEmail());
+            userFCMToken.setFcmToken(loginRequest.getFcmToken());
+            userRepository.save(userFCMToken);
+
             token = jwtUtil.generateToken(userDetails);
             user = userRepository.findByEmailAddress(loginRequest.getEmail());
             Optional<Profile> profileEntityOptional = this.profileRepository.findByUserId(user.getId());
@@ -298,11 +310,6 @@ public class UserServiceImpl implements UserService {
         }
         return ResponseEntity.ofNullable(new ApiResponse<LoginResponse>("Failed", "token not generated", null, 444));
 
-    }
-
-    @Bean
-    BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }

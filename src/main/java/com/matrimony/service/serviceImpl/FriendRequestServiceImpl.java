@@ -4,6 +4,7 @@ import com.matrimony.entity.FriendRequest;
 import com.matrimony.entity.Profile;
 import com.matrimony.entity.Slider;
 import com.matrimony.entity.User;
+import com.matrimony.firebaseNotifications.FirebaseMessagingService;
 import com.matrimony.repository.FriendRequestRepository;
 import com.matrimony.repository.ProfileRepository;
 import com.matrimony.request.SearchPaginationRequest;
@@ -34,6 +35,9 @@ public class FriendRequestServiceImpl  implements FriendRequestService {
     @Autowired
     ProfileRepository profileRepository;
 
+    @Autowired
+    FirebaseMessagingService firebaseMessagingService;
+
     //    below method will by default create the timestamp
     @PrePersist
     public void prePersist(FriendRequest friendRequest) {
@@ -56,6 +60,11 @@ public class FriendRequestServiceImpl  implements FriendRequestService {
             friendRequest.setReceiver_id(friendRequestRequest.getReceiver_id());
             friendRequest.setStatus(friendRequestRequest.getStatus());
             FriendRequest payload = this.friendRequestRepository.save(friendRequest);
+
+//            sending friend request notification
+            firebaseMessagingService.sendFriendRequestNotification(friendRequestRequest);
+
+
             return ResponseEntity.ok(new ApiResponse<>("success", "Data saved successfully", payload, 200));
         } catch (Exception e) {
             // Handle the exception here and log it

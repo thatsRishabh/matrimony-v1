@@ -6,6 +6,8 @@ import com.matrimony.request.SearchPaginationRequest;
 import com.matrimony.response.ApiResponse;
 import com.matrimony.service.MenuService;
 import com.matrimony.service.ProfileService;
+import com.matrimony.validator.ProfileValidation;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,7 @@ public class ProfileController {
 
     //add menu
     @PostMapping()
-    public ResponseEntity<ApiResponse<Profile>> addProfile(@RequestBody Profile profileRequest){
+    public ResponseEntity<ApiResponse<Profile>> addProfile(@Valid  @RequestBody ProfileValidation profileRequest){
         return this.profileService.createProfile(profileRequest);
     }
 
@@ -31,7 +33,7 @@ public class ProfileController {
     }
 
     @PutMapping("/{profileId}")
-    public ResponseEntity<ApiResponse<Profile>> updateProfile(@PathVariable("profileId") Long profileId , @RequestBody Profile profileRequest){
+    public ResponseEntity<ApiResponse<Profile>> updateProfile(@PathVariable("profileId") Long profileId ,@Valid @RequestBody ProfileValidation profileRequest){
         return this.profileService.updateProfile(profileId, profileRequest);
     }
 

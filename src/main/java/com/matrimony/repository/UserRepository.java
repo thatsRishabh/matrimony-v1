@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmailAddress(String emailAddress);
 
+    User findByResetOtp(String resetOtp);
+
     public Page<User> findByFirstNameContaining(String name, Pageable pageable);
 
     public Page<User> findByGender(int gender, Pageable pageable);

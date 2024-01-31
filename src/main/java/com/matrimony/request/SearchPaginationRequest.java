@@ -17,6 +17,7 @@ public class SearchPaginationRequest {
     private String title;
     private String content;
     private String religion;
+    private String caste;
     private Boolean active;
     private Integer per_page_record;
     private Integer page;

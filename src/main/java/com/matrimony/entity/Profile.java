@@ -25,17 +25,16 @@ public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(columnDefinition = "INT COMMENT '1:self, 2: Parents, 3:Siblings, 4: Agent, 5:Other'")
-    private Integer createdBy;
+//    @Column(columnDefinition = "INT COMMENT '1:self, 2: Parents, 3:Siblings, 4: Agent, 5:Other'")
+    private String createdBy;
 
-    @Column(columnDefinition = "INT COMMENT '1:Married, 2: Unmarried'")
-    private Integer maritalStatus;
+    private String maritalStatus;
 
-    @Column(columnDefinition = "INT COMMENT '1:Yes, 2: No'")
-    private Integer haveChildren;
-    private Integer numberOfChildren;
-    private Integer weight;
-    private Integer height;
+//    @Column(columnDefinition = "INT COMMENT '1:Yes, 2: No'")
+    private String haveChildren;
+    private String numberOfChildren;
+    private String weight;
+    private String height;
     private String bodyType;
     private String complexion;
     private String religion;
@@ -45,6 +44,7 @@ public class Profile {
     private String subCaste;
     private String manglik;
     private String familyValues;
+    private String nickName;
 
     @Lob
     @Column(columnDefinition = "TEXT")
@@ -62,18 +62,21 @@ public class Profile {
     private Date dateOfMarriage;
 
     private String bloodGroup;
-    private Integer annualIncome;
+    private String annualIncome;
     private String companyName;
-    private Integer numberOfBrother;
-    private Integer numberOfSister;
+    private String numberOfBrother;
+    private String numberOfSister;
     private String motherName;
     private String fatherName;
     private String contactPersonName;
+    private String contactPersonPhoneNumber;
     private String contactPersonRelationShip;
     private String convenientCallTime;
     private String placeOfBirth;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ", timezone = "UTC")
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ", timezone = "UTC")
+//    private Timestamp timeOFBirth;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "UTC")
     private Timestamp timeOFBirth;
     private String hobbies;
     private String interests;
