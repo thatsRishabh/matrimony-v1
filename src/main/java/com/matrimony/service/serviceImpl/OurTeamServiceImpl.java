@@ -45,6 +45,7 @@ public class OurTeamServiceImpl implements OurTeamService {
             OurTeam ourTeam = new OurTeam();
             ourTeam.setName(ourTeamRequest.getName());
             ourTeam.setDesignation(ourTeamRequest.getDesignation());
+            ourTeam.setAbout(ourTeamRequest.getAbout());
             ourTeam.setOrder_number(ourTeamRequest.getOrder_number());
             ourTeam.setImage(ourTeamRequest.getImage());
             ourTeam.setStatus(ourTeamRequest.getStatus());
@@ -118,6 +119,7 @@ public class OurTeamServiceImpl implements OurTeamService {
                 OurTeam updatedOurTeam= existingOurTeam.get();
                 updatedOurTeam.setName(ourTeamRequest.getName());
                 updatedOurTeam.setDesignation(ourTeamRequest.getDesignation());
+                updatedOurTeam.setAbout(ourTeamRequest.getAbout());
                 updatedOurTeam.setOrder_number(ourTeamRequest.getOrder_number());
                 updatedOurTeam.setImage(ourTeamRequest.getImage());
                 updatedOurTeam.setStatus(ourTeamRequest.getStatus());

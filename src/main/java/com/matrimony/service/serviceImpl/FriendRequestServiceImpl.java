@@ -64,7 +64,6 @@ public class FriendRequestServiceImpl  implements FriendRequestService {
 //            sending friend request notification
             firebaseMessagingService.sendFriendRequestNotification(friendRequestRequest);
 
-
             return ResponseEntity.ok(new ApiResponse<>("success", "Data saved successfully", payload, 200));
         } catch (Exception e) {
             // Handle the exception here and log it
@@ -120,24 +119,34 @@ public class FriendRequestServiceImpl  implements FriendRequestService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Object>> getReceivedFriendRequests(SearchPaginationRequest searchParams) {
+    public ResponseEntity<ApiResponse<Object>> getFriendRequests(SearchPaginationRequest searchParams) {
 
         try {
+            Long userIdForFriendRequestReceived = searchParams.getUserIdForFriendRequestReceived();
+            Long status = searchParams.getStatus();
             Long userId = searchParams.getUserId();
             Integer perPageRecord = searchParams.getPer_page_record();
 
 // Set the default value of page to 1
             Integer page = (searchParams.getPage() != null) ? searchParams.getPage() : 1;
 
-            Page<FriendRequest> sliderPage = friendRequestRepository.findByReceiverId(
-                    userId,
-                    PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id")))
-            );
+            Page<FriendRequest> sliderPage;
+
+
+            if (userIdForFriendRequestReceived != null) {
+                sliderPage = friendRequestRepository.findByReceiverId(
+                        userIdForFriendRequestReceived,
+                    PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (userId != null && status != null) {
+                sliderPage = friendRequestRepository.findBySenderIdStatusId(userId, status ,PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else {
+                sliderPage = friendRequestRepository.findAll(PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
+            }
 
             List<FriendRequest> sliderEntities = sliderPage.getContent();
 
-
-//            List<User> userEntities = userPage.getContent();
 
             //  Below code is when we are making any join to two tables
             List<UserFriendRequestProfileResponse> responseList = new ArrayList<>();

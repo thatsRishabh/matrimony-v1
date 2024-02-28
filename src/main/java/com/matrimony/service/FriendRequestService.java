@@ -13,7 +13,7 @@ import java.util.List;
 public interface FriendRequestService {
     public ResponseEntity<ApiResponse<FriendRequest>> createFriendRequest(FriendRequestValidation friendRequestRequest);
 
-    public ResponseEntity<ApiResponse<Object>> getReceivedFriendRequests(SearchPaginationRequest searchParams);
+    public ResponseEntity<ApiResponse<Object>> getFriendRequests(SearchPaginationRequest searchParams);
 
     public ResponseEntity<ApiResponse<List<FriendRequest>>> getFriendRequest(Long friendRequestId);
 

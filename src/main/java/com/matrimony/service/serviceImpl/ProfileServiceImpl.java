@@ -1,5 +1,6 @@
 package com.matrimony.service.serviceImpl;
 
+import com.matrimony.entity.FriendRequest;
 import com.matrimony.entity.Profile;
 import com.matrimony.entity.Slider;
 import com.matrimony.repository.ProfileRepository;
@@ -115,42 +116,53 @@ public class ProfileServiceImpl implements ProfileService {
         try {
             Long id = searchParams.getId();
             String religion = searchParams.getReligion();
+
+            String city = searchParams.getCity();
+            int gender = searchParams.getGender();
             String caste = searchParams.getCaste();
             Integer perPageRecord = searchParams.getPer_page_record();
 
             // Set the default value of page to 1
             Integer page = (searchParams.getPage() != null) ? searchParams.getPage() : 1;
 
-            Page<Profile> categoryPage;
+            Page<Profile> profilePage;
 
             if (id != null) {
                 Optional<Profile> categoryOptional = profileRepository.findById(id);
                 if (categoryOptional.isPresent()) {
                     Profile category = categoryOptional.get();
-                    categoryPage = new PageImpl<>(Collections.singletonList(category));
+                    profilePage = new PageImpl<>(Collections.singletonList(category));
                 } else {
-                    categoryPage = Page.empty(); // No matching category found
+                    profilePage = Page.empty(); // No matching category found
                 }
             }
             else if (religion != null) {
-                categoryPage = profileRepository.findByReligionContaining(religion, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+                profilePage = profileRepository.findByReligionContaining(religion, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (city != null) {
+                profilePage = profileRepository.findByPlaceOfBirthContaining(city, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
             else if (caste != null) {
-                categoryPage = profileRepository.findByCasteContaining(caste, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+                profilePage = profileRepository.findByCasteContaining(caste, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
+
+            else if (gender != 0) {
+                profilePage = profileRepository.findByUser_Gender(gender, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+
             else {
-                categoryPage = profileRepository.findAll(PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
+                profilePage = profileRepository.findAll(PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
             }
             //  Below code is when we are making any join to two tables
-            List<Profile> parents = categoryPage.getContent();
+            List<Profile> parents = profilePage.getContent();
 
             Map<String, Object> map = Map.of(
                     "data", parents,
 //                    "data", responseList,
-                    "totalElements", categoryPage.getTotalElements(),
+                    "totalElements", profilePage.getTotalElements(),
                     "currentPage", page,
                     "perPageRecord", perPageRecord,
-                    "totalPages", categoryPage.getTotalPages()
+                    "totalPages", profilePage.getTotalPages()
             );
             return ResponseEntity.ok( new ApiResponse<>("success", "Data retrieved successfully", map, 200));
         } catch (Exception e) {

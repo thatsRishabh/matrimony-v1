@@ -7,6 +7,7 @@ import com.google.firebase.messaging.Notification;
 import com.matrimony.entity.User;
 import com.matrimony.repository.UserRepository;
 import com.matrimony.response.ApiResponse;
+import com.matrimony.service.NotificationService;
 import com.matrimony.validator.FriendRequestValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ public class FirebaseMessagingService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public String sendNotificationByToken(NotificationMessage notificationMessage){
 
@@ -62,6 +66,11 @@ public class FirebaseMessagingService {
                     .builder()
                     .setTitle("You have a friend Request from " +friendRequestSender.get().getFirstName())
                     .build();
+
+            System.out.println("------------------------friendRequestRequest.getReceiver_id()"+ friendRequestRequest.getReceiver_id().getClass());
+            System.out.println("------------------------name"+ friendRequestSender.get().getFirstName());
+//            saving the notification in the database
+            notificationService.createNotification(friendRequestRequest.getReceiver_id(),"You have a friend Request from " +friendRequestSender.get().getFirstName());
 
             Message message =Message
                     .builder()

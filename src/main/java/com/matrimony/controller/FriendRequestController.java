@@ -31,8 +31,8 @@ public class FriendRequestController {
     //get all friend request received
     @PostMapping("/")
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<Object>> getReceivedFriendRequests(@RequestBody SearchPaginationRequest searchParams){
-        return this.friendRequestService.getReceivedFriendRequests(searchParams);
+    public ResponseEntity<ApiResponse<Object>> getFriendRequests(@RequestBody SearchPaginationRequest searchParams){
+        return this.friendRequestService.getFriendRequests(searchParams);
     }
 
 

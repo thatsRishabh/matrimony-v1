@@ -21,4 +21,8 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
     @Query(value = "SELECT * FROM friend_request_entity WHERE receiver_id_user_id = :receiverId", nativeQuery = true)
     public Page<FriendRequest> findByReceiverId(@Param("receiverId") long receiverId, Pageable pageable);
 
+
+    @Query(value = "SELECT * FROM friend_request_entity WHERE sender_id_user_id = :userId AND status = :status ", nativeQuery = true)
+    public Page<FriendRequest> findBySenderIdStatusId( @Param("userId") long userId, @Param("status") long status,  Pageable pageable);
+
 }

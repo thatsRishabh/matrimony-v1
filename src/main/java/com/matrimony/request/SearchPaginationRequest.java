@@ -11,12 +11,15 @@ public class SearchPaginationRequest {
     private Long id;
     private Long categoryId;
     private Long userId;
+    private Long userIdForFriendRequestReceived;
+    private Long status;
     private Long quizId;
     private String name;
     private String firstName;
     private String title;
     private String content;
     private String religion;
+    private String city;
     private String caste;
     private Boolean active;
     private Integer per_page_record;

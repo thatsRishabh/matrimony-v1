@@ -22,6 +22,7 @@ public class OurTeam {
     private long id;
     private String name;
     private String designation;
+    private String about;
     private Integer order_number;
     private Integer status;
     private String image;
