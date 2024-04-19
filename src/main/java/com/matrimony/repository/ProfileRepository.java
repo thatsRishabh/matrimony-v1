@@ -8,11 +8,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
-    public Page<Profile> findByReligionContaining(String religion, Pageable pageable);
-    public Page<Profile> findByPlaceOfBirthContaining(String city, Pageable pageable);
-    public Page<Profile> findByCasteContaining(String caste, Pageable pageable);
+    public Page<Profile> findByReligionContainingAndUser_IdNot(String religion,int id, Pageable pageable);
+    public Page<Profile> findByPlaceOfBirthContainingAndUser_IdNot(String city,int id, Pageable pageable);
+    public Page<Profile> findByCasteContainingAndUser_IdNot(String caste, int id, Pageable pageable);
     public Optional<Profile> findByUserId(int id);
 
-//    below is to search inside any object
-    public Page<Profile> findByUser_Gender(int gender, Pageable pageable);
+//    below is to search inside any object findByCasteContainingAndUser_GenderAndUser_IdNot findByUser_GenderAndUser_IdNot
+public Page<Profile> findByUser_GenderAndCasteContainingAndReligionContainingAndPlaceOfBirthContainingAndUser_IdNot(int gender,String caste,String religion,String city,int id, Pageable pageable);
+    public Page<Profile> findByUser_GenderAndCasteContainingAndUser_IdNot(int gender,String caste,int id, Pageable pageable);
+    public Page<Profile> findByUser_GenderAndReligionContainingAndUser_IdNot(int gender,String religion,int id, Pageable pageable);
+    public Page<Profile> findByUser_GenderAndPlaceOfBirthContainingAndUser_IdNot(int gender,String city,int id, Pageable pageable);
+
+    public Page<Profile> findByUser_GenderAndUser_IdNot(int gender,int id, Pageable pageable);
+
+    public Page<Profile> findByIdNot(int id, Pageable pageable);
+
+    // New method for searching by name and city
+    public Page<Profile> findByCasteContainingAndReligionContainingAndUser_IdNot(String name, String city, int id,Pageable pageable);
+
 }

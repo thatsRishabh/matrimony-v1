@@ -15,12 +15,13 @@ public class SearchPaginationRequest {
     private Long status;
     private Long quizId;
     private String name;
-    private String firstName;
+    private String fullName;
     private String title;
     private String content;
     private String religion;
     private String city;
     private String caste;
+    private String Question;
     private Boolean active;
     private Integer per_page_record;
     private Integer page;

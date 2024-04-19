@@ -18,6 +18,9 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
     @Query(value = "SELECT * FROM friend_request_entity WHERE receiver_id_user_id = :receiverId AND sender_id_user_id = :userId ", nativeQuery = true)
     FriendRequest findBySenderIdReceiverId(@Param("receiverId") long receiverId, @Param("userId") long userId);
 
+    @Query(value = "SELECT * FROM friend_request_entity WHERE receiver_id_user_id = :receiverId AND sender_id_user_id = :userId OR receiver_id_user_id = :userId AND sender_id_user_id = :receiverId", nativeQuery = true)
+    FriendRequest findBySenderIdORReceiverId(@Param("receiverId") long receiverId, @Param("userId") long userId);
+
     @Query(value = "SELECT * FROM friend_request_entity WHERE receiver_id_user_id = :receiverId", nativeQuery = true)
     public Page<FriendRequest> findByReceiverId(@Param("receiverId") long receiverId, Pageable pageable);
 
@@ -26,3 +29,4 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
     public Page<FriendRequest> findBySenderIdStatusId( @Param("userId") long userId, @Param("status") long status,  Pageable pageable);
 
 }
+

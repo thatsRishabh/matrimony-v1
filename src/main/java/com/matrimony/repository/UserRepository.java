@@ -10,9 +10,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByResetOtp(String resetOtp);
 
-    public Page<User> findByFirstNameContaining(String name, Pageable pageable);
+    public Page<User> findByFullNameContaining(String name, Pageable pageable);
 
-    public Page<User> findByGender(int gender, Pageable pageable);
+    public Page<User> findByGenderAndIdNot(int gender,int id, Pageable pageable);
+
+    public Page<User> findByIdNot(int id, Pageable pageable);
 
     boolean existsByEmailAddress(String emailAddress);
 }

@@ -15,7 +15,9 @@ public interface FriendRequestService {
 
     public ResponseEntity<ApiResponse<Object>> getFriendRequests(SearchPaginationRequest searchParams);
 
-    public ResponseEntity<ApiResponse<List<FriendRequest>>> getFriendRequest(Long friendRequestId);
+    public ResponseEntity<ApiResponse<Object>> getAcceptedFriends(SearchPaginationRequest searchParams);
+
+//    public ResponseEntity<ApiResponse<List<FriendRequest>>> getFriendRequest(Long friendRequestId);
 
     public ResponseEntity<ApiResponse<FriendRequest>> updateFriendRequest(Long friendRequestId, FriendRequestValidation friendRequestRequest);
 

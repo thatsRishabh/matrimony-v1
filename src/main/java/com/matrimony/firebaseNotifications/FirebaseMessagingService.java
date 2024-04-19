@@ -5,6 +5,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.matrimony.entity.User;
+import com.matrimony.repository.NotificationRepository;
 import com.matrimony.repository.UserRepository;
 import com.matrimony.response.ApiResponse;
 import com.matrimony.service.NotificationService;
@@ -23,6 +24,9 @@ public class FirebaseMessagingService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    NotificationRepository notificationRepository;
 
     @Autowired
     private NotificationService notificationService;
@@ -57,20 +61,20 @@ public class FirebaseMessagingService {
 
         Optional<User> friendRequestReceiver = userRepository.findById(Long.valueOf(friendRequestRequest.getReceiver_id().getId()));
 
+        System.out.println("------------------------fcm"+ friendRequestReceiver.get().getFcmToken());
+
         if (friendRequestReceiver.get().getFcmToken() != null) {
             Optional<User> friendRequestSender = userRepository.findById(Long.valueOf(friendRequestRequest.getSender_id().getId()));
 
-//            System.out.println("You have a friend Request from " +friendRequestSender.get().getFirstName());
-
             Notification notification= Notification
                     .builder()
-                    .setTitle("You have a friend Request from " +friendRequestSender.get().getFirstName())
+                    .setTitle("You have a friend Request from " +friendRequestSender.get().getFullName())
                     .build();
 
-            System.out.println("------------------------friendRequestRequest.getReceiver_id()"+ friendRequestRequest.getReceiver_id().getClass());
-            System.out.println("------------------------name"+ friendRequestSender.get().getFirstName());
+            System.out.println("------------------------friendRequestRequest.getReceiver_id()"+ friendRequestRequest.getReceiver_id());
+            System.out.println("------------------------name   "+ friendRequestSender.get().getFullName());
 //            saving the notification in the database
-            notificationService.createNotification(friendRequestRequest.getReceiver_id(),"You have a friend Request from " +friendRequestSender.get().getFirstName());
+            notificationService.createNotification(friendRequestRequest.getReceiver_id(),"You have a friend Request from " +friendRequestSender.get().getFullName());
 
             Message message =Message
                     .builder()

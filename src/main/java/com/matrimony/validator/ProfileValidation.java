@@ -18,7 +18,7 @@ public class ProfileValidation {
 
 //    @Column(columnDefinition = "INT COMMENT '1:self, 2: Parents, 3:Siblings, 4: Agent, 5:Other'")
 
-    @NotBlank(message = "Please enter a valid created By Status")
+//    @NotBlank(message = "Please enter a valid created By Status")
     @Digits(integer =2, fraction = 0, message = "'1:self, 2: Parents, 3:Siblings, 4: Agent, 5:Other'")
     private String createdBy;
 //
@@ -26,12 +26,12 @@ public class ProfileValidation {
     @Digits(integer = 2, fraction = 0, message = "'1:Married, 2: Unmarried'")
     private String maritalStatus;
 
-    @NotBlank(message = "Please enter a valid Children Status")
+//    @NotBlank(message = "Please enter a valid Children Status")
     @Digits(integer = 2, fraction = 0, message = "'1:Yes, 2: No'")
     private String haveChildren;
 
-    @NotBlank(message = "Please enter a valid Children Status")
-    @Digits(integer = 2, fraction = 0)
+//    @NotBlank(message = "Please enter a valid Children Status")
+    @Digits(integer = 2, fraction = 0, message = "Please enter a valid Children Status")
     private String numberOfChildren;
 
     @NotBlank(message = "Please enter a valid weight Status")
@@ -70,11 +70,11 @@ public class ProfileValidation {
     private String annualIncome;
     private String companyName;
 
-    @NotBlank(message = "Please enter a valid number Of Brother ")
-    @Digits(integer = 2, fraction = 0)
+//    @NotBlank(message = "Please enter a valid number Of Brother ")
+    @Digits(integer = 2, fraction = 0, message = "Please enter a valid number Of Brother")
     private String numberOfBrother;
 
-    @NotBlank(message = "Please enter a valid number Of sister")
+//    @NotBlank(message = "Please enter a valid number Of sister")
     @Digits(integer = 2, fraction = 0)
     private String numberOfSister;
     private String motherName;
@@ -99,11 +99,20 @@ public class ProfileValidation {
     private String rasi;
     private String nakshatra;
     private String astroprofile;
+
+    @NotBlank(message = "Please enter a image")
     private String photo1;
+
+    @NotBlank(message = "Please enter a image")
     private String photo2;
+
+    @NotBlank(message = "Please upload a image")
     private String photo3;
     private String facebookUrl;
     private String linkedinUrl;
+
+//    @NotBlank(message = "Please enter a valid number Of whatsApp")
+    @Digits(integer = 10, fraction = 0 , message = "Please enter a valid number Of whatsApp")
     private String whatsappUrl;
     private User user;
 }

@@ -22,11 +22,8 @@ public class User {
     @Column(name = "user_id")
     private int Id;
 
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
+    @Column(name = "full_name")
+    private String fullName;
 
     @Column(name = "user_type")
     private String userType;
@@ -54,8 +51,14 @@ public class User {
     @Column(name = "gender", columnDefinition = "INT COMMENT '1: male, 2: female'")
     private int gender;
 
+    @Column(columnDefinition = "INT COMMENT '1: male, 2: female 3: Both'")
+    private Integer genderIntrest;
+
     @Column(name = "subscription_type", columnDefinition = "INT COMMENT '1: free, 2: gold, 3: premium'")
     private int subscriptionType;
+
+//    @ManyToOne(fetch = FetchType.EAGER)
+//    private Subscription subscription;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "date_of_birth")

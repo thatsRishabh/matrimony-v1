@@ -35,17 +35,24 @@ public class FriendRequestController {
         return this.friendRequestService.getFriendRequests(searchParams);
     }
 
+    //get all friend request received
+    @PostMapping("/accepted")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<Object>> getAcceptedFriends(@RequestBody SearchPaginationRequest searchParams){
+        return this.friendRequestService.getAcceptedFriends(searchParams);
+    }
+
 
     @PutMapping("/{friendRequestId}")
     public ResponseEntity<ApiResponse<FriendRequest>>  updateFriendRequest(@PathVariable("friendRequestId") Long friendRequestId , @Valid @RequestBody FriendRequestValidation friendRequestRequest){
         return this.friendRequestService.updateFriendRequest(friendRequestId, friendRequestRequest);
     }
 
-    // get single category
-    @GetMapping("/{friendRequestId}")
-    public ResponseEntity<ApiResponse<List<FriendRequest>>> getFriendRequest(@PathVariable("friendRequestId") Long friendRequestId){
-        return this.friendRequestService.getFriendRequest(friendRequestId);
-    }
+//    // get single category
+//    @GetMapping("/{friendRequestId}")
+//    public ResponseEntity<ApiResponse<List<FriendRequest>>> getFriendRequest(@PathVariable("friendRequestId") Long friendRequestId){
+//        return this.friendRequestService.getFriendRequest(friendRequestId);
+//    }
 
     @DeleteMapping("/{friendRequestId}")
     public ResponseEntity<ApiResponse<?>> deleteFriendRequest(@PathVariable("friendRequestId") Long friendRequestId){

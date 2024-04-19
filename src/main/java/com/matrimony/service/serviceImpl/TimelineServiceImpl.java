@@ -40,13 +40,6 @@ public class TimelineServiceImpl implements TimelineService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private String title;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "UTC")
-    private Timestamp time;
-    private String description;
-    private Integer order_number;
-    private String image;
-
     @Override
     public ResponseEntity<ApiResponse<Timeline>> createTimeline(TimelineValidation timelineRequest) {
         try {

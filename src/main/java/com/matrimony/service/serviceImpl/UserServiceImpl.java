@@ -31,6 +31,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -72,6 +74,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<ApiResponse<User>> createUser(UserValidation userRequest) {
        try {
+
            // Check if the email address is already taken
            if (userRepository.existsByEmailAddress(userRequest.getEmailAddress())) {
                return ResponseEntity.badRequest().body(new ApiResponse<>("error", "Email address already exists", null, 400));
@@ -92,9 +95,13 @@ public class UserServiceImpl implements UserService {
                return ResponseEntity.badRequest().body(new ApiResponse<>("error", "User must be at least 18 years old", null, 400));
            }
 
+
+           if (!userRequest.getPassword().equals(userRequest.getConfirmPassword())) {
+               return ResponseEntity.internalServerError().body(new ApiResponse<>("error", "Both password do not match", null, 500));
+           }
+
             User user = new User();
-            user.setFirstName(userRequest.getFirstName());
-            user.setLastName(userRequest.getLastName());
+            user.setFullName(userRequest.getFullName());
             user.setEmailAddress(userRequest.getEmailAddress());
             user.setUserType(userRequest.getUserType());
             user.setAddress(userRequest.getAddress());
@@ -102,6 +109,7 @@ public class UserServiceImpl implements UserService {
             user.setStatus(1);
             user.setImagePath(userRequest.getImagePath());
             user.setGender(userRequest.getGender());
+            user.setGenderIntrest(userRequest.getGenderIntrest());
             user.setSubscriptionType(userRequest.getSubscriptionType());
             user.setDateOfBirth(userRequest.getDateOfBirth());
             user.setRole(userRequest.getRole());
@@ -128,8 +136,7 @@ public class UserServiceImpl implements UserService {
             if (existingUser.isPresent()) {
                 // Update the existing category with the new data
                 User updatedUser = existingUser.get();
-                updatedUser.setFirstName(userRequest.getFirstName());
-                updatedUser.setLastName(userRequest.getLastName());
+                updatedUser.setFullName(userRequest.getFullName());
 //                updatedUser.setEmailAddress(userRequest.getEmailAddress());
                 updatedUser.setUserType(userRequest.getUserType());
                 updatedUser.setAddress(userRequest.getAddress());
@@ -137,15 +144,16 @@ public class UserServiceImpl implements UserService {
                 updatedUser.setStatus(1);
                 updatedUser.setImagePath(userRequest.getImagePath());
                 updatedUser.setGender(userRequest.getGender());
+                updatedUser.setGenderIntrest(userRequest.getGenderIntrest());
                 updatedUser.setSubscriptionType(userRequest.getSubscriptionType());
                 updatedUser.setDateOfBirth(userRequest.getDateOfBirth());
                 updatedUser.setRole(userRequest.getRole());
 //                encoding of password
 
-                String password = userRequest.getPassword();
-                BCryptPasswordEncoder encoder = this.bCryptPasswordEncoder();
-                String encodedPassword = encoder.encode(password);
-                updatedUser.setPassword(encodedPassword);
+//                String password = userRequest.getPassword();
+//                BCryptPasswordEncoder encoder = this.bCryptPasswordEncoder();
+//                String encodedPassword = encoder.encode(password);
+//                updatedUser.setPassword(encodedPassword);
 
                 // Save the updated category
                 User payload = this.userRepository.save(updatedUser);
@@ -168,8 +176,7 @@ public class UserServiceImpl implements UserService {
 
         try {
             Long id = searchParams.getId();
-            Long userId = searchParams.getUserId();
-            String firstName = searchParams.getFirstName();
+            String fullName = searchParams.getFullName();
             int gender = searchParams.getGender();
             Integer perPageRecord = searchParams.getPer_page_record();
 
@@ -177,6 +184,12 @@ public class UserServiceImpl implements UserService {
             Integer page = (searchParams.getPage() != null) ? searchParams.getPage() : 1;
 
             Page<User> userPage;
+
+
+            // Get the current user's data from jwt token
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUserEmail = authentication.getName();
+            User currentUserProfile = userRepository.findByEmailAddress(currentUserEmail);
 
             if (id != null) {
                 Optional<User> userOptional = userRepository.findById(id);
@@ -187,27 +200,39 @@ public class UserServiceImpl implements UserService {
                     userPage = Page.empty(); // No matching category found
                 }
             }
-            else if (firstName != null) {
-                userPage = userRepository.findByFirstNameContaining(firstName, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            else if (fullName != null) {
+                userPage = userRepository.findByFullNameContaining(fullName, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
             else if (gender != 0 ) {
-                userPage = userRepository.findByGender(gender, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+                userPage = userRepository.findByGenderAndIdNot(gender,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
             else {
-                userPage = userRepository.findAll(PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
+                userPage = userRepository.findByIdNot(currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
             }
 
             List<User> userEntities = userPage.getContent();
 
-            //  Below code is when we are making any join to two tables
+            //  Below code is when we are making any join to two tables. This will send user data along with its friend request data
             List<UserFriendRequestResponse> responseList = new ArrayList<>();
 
+            System.out.println("login profile--------------------" + currentUserProfile.getId());
             for (User parent : userEntities) {
-                FriendRequest children = friendRequestRepository.findBySenderIdReceiverId(parent.getId(), userId);
-                UserFriendRequestResponse response = new UserFriendRequestResponse();
-                response.setUser(parent);
-                response.setFriendRequest(children);
-                responseList.add(response);
+                FriendRequest children = friendRequestRepository.findBySenderIdORReceiverId(parent.getId(), currentUserProfile.getId());
+
+//      if friend request is already accepted than it will not show data of that corresponding user
+                if (children != null && children.getStatus() ==1){
+                    System.out.println("here---------->"+ children.getStatus());
+                    UserFriendRequestResponse response = new UserFriendRequestResponse();
+                    response.setUser(null);
+                    response.setFriendRequest(null);
+                    responseList.add(response);
+                }else {
+                    UserFriendRequestResponse response = new UserFriendRequestResponse();
+                    response.setUser(parent);
+                    response.setFriendRequest(children);
+                    responseList.add(response);
+                }
+
             }
 
             Map<String, Object> map = Map.of(

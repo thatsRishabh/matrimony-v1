@@ -3,6 +3,7 @@ package com.matrimony.service.serviceImpl;
 import com.matrimony.entity.FriendRequest;
 import com.matrimony.entity.Profile;
 import com.matrimony.entity.Slider;
+import com.matrimony.entity.User;
 import com.matrimony.repository.ProfileRepository;
 import com.matrimony.repository.UserRepository;
 import com.matrimony.request.SearchPaginationRequest;
@@ -19,10 +20,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -50,7 +56,13 @@ public class ProfileServiceImpl implements ProfileService {
             profile.setFatherName(profileRequest.getFatherName());
             profile.setMotherName(profileRequest.getMotherName());
             profile.setFacebookUrl(profileRequest.getFacebookUrl());
-            profile.setWhatsappUrl(profileRequest.getWhatsappUrl());
+
+
+//        Generating WhatsApp URL
+            String whatsAppBaseURl = "http://wa.me/";
+            String whatsAppURL=whatsAppBaseURl.concat(profileRequest.getWhatsappUrl());
+
+            profile.setWhatsappUrl(whatsAppURL);
             profile.setLinkedinUrl(profileRequest.getLinkedinUrl());
             profile.setCreatedBy(profileRequest.getCreatedBy());
             profile.setPhoto1(profileRequest.getPhoto1());
@@ -127,6 +139,13 @@ public class ProfileServiceImpl implements ProfileService {
 
             Page<Profile> profilePage;
 
+
+            // Get the current user's data from jwt token
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUserEmail = authentication.getName();
+            User currentUserProfile = userRepository.findByEmailAddress(currentUserEmail);
+
+
             if (id != null) {
                 Optional<Profile> categoryOptional = profileRepository.findById(id);
                 if (categoryOptional.isPresent()) {
@@ -136,25 +155,45 @@ public class ProfileServiceImpl implements ProfileService {
                     profilePage = Page.empty(); // No matching category found
                 }
             }
+            else if (gender != 0 && caste != null && religion != null && city != null) {
+                profilePage = profileRepository.findByUser_GenderAndCasteContainingAndReligionContainingAndPlaceOfBirthContainingAndUser_IdNot(gender, caste,religion,city,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (religion != null && caste != null) {
+                profilePage = profileRepository.findByCasteContainingAndReligionContainingAndUser_IdNot(caste, religion, currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (gender != 0 && caste != null) {
+                profilePage = profileRepository.findByUser_GenderAndCasteContainingAndUser_IdNot(gender, caste,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (gender != 0 && religion != null) {
+                profilePage = profileRepository.findByUser_GenderAndReligionContainingAndUser_IdNot(gender, religion,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (gender != 0 && city != null) {
+                profilePage = profileRepository.findByUser_GenderAndPlaceOfBirthContainingAndUser_IdNot(gender, city,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
             else if (religion != null) {
-                profilePage = profileRepository.findByReligionContaining(religion, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+                profilePage = profileRepository.findByReligionContainingAndUser_IdNot(religion, currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
             else if (city != null) {
-                profilePage = profileRepository.findByPlaceOfBirthContaining(city, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+                profilePage = profileRepository.findByPlaceOfBirthContainingAndUser_IdNot(city,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
-            else if (caste != null) {
-                profilePage = profileRepository.findByCasteContaining(caste, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            else if (gender != 0) {
+                profilePage = profileRepository.findByUser_GenderAndUser_IdNot(gender,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
 
-            else if (gender != 0) {
-                profilePage = profileRepository.findByUser_Gender(gender, PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            else if (caste != null) {
+                profilePage = profileRepository.findByCasteContainingAndUser_IdNot(caste,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
+
+
 
             else {
-                profilePage = profileRepository.findAll(PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
+                profilePage = profileRepository.findByIdNot(currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
             }
             //  Below code is when we are making any join to two tables
             List<Profile> parents = profilePage.getContent();
+
+
+
 
             Map<String, Object> map = Map.of(
                     "data", parents,
@@ -186,7 +225,12 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedProfile.setFatherName(profileRequest.getFatherName());
                 updatedProfile.setMotherName(profileRequest.getMotherName());
                 updatedProfile.setFacebookUrl(profileRequest.getFacebookUrl());
-                updatedProfile.setWhatsappUrl(profileRequest.getWhatsappUrl());
+
+                //        Generating WhatsApp URL
+                String whatsAppBaseURl = "http://wa.me/";
+                String whatsAppURL=whatsAppBaseURl.concat(profileRequest.getWhatsappUrl());
+
+                updatedProfile.setWhatsappUrl(whatsAppURL);
                 updatedProfile.setLinkedinUrl(profileRequest.getLinkedinUrl());
                 updatedProfile.setCompanyName(profileRequest.getCompanyName());
                 updatedProfile.setCreatedBy(profileRequest.getCreatedBy());

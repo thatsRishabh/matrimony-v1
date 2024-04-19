@@ -5,6 +5,7 @@ import com.matrimony.entity.Notification;
 import com.matrimony.entity.User;
 import com.matrimony.repository.GalleryRepository;
 import com.matrimony.repository.NotificationRepository;
+import com.matrimony.repository.UserRepository;
 import com.matrimony.request.SearchPaginationRequest;
 import com.matrimony.response.ApiResponse;
 import com.matrimony.service.NotificationService;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -32,19 +35,21 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     NotificationRepository notificationRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     //    below method will by default create the timestamp
     @PrePersist
-    public void prePersist(Gallery gallery) {
+    public void prePersist(Notification notification) {
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        gallery.setCreatedAt(now);
-        gallery.setUpdatedAt(now);
+        notification.setCreatedAt(now);
+        notification.setUpdatedAt(now);
     }
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public ResponseEntity<ApiResponse<Notification>> createNotification(User user, String message) {
-        System.out.println("------------------------called");
         try {
             Notification notification= new Notification();
             notification.setUserId(user);
@@ -70,6 +75,11 @@ public class NotificationServiceImpl implements NotificationService {
 
             Page<Notification> galleryPage;
 
+            // Get the current user's data from jwt token
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUserEmail = authentication.getName();
+            User currentUserProfile = userRepository.findByEmailAddress(currentUserEmail);
+
             if (id != null) {
                 Optional<Notification> galleryOptional = notificationRepository.findById(id);
                 if (galleryOptional.isPresent()) {
@@ -80,7 +90,10 @@ public class NotificationServiceImpl implements NotificationService {
                 }
             }
             else {
-                galleryPage = notificationRepository.findAll(PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+
+                galleryPage = notificationRepository.findByUserId(currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+
+//                galleryPage = notificationRepository.findAll(PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
 
             List<Notification> galleryEntities = galleryPage.getContent();
