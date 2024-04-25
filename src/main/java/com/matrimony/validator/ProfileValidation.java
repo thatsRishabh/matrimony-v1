@@ -1,6 +1,8 @@
 package com.matrimony.validator;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.matrimony.entity.City;
+import com.matrimony.entity.Language;
 import com.matrimony.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -10,6 +12,7 @@ import lombok.ToString;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 @Setter
 @Getter
@@ -95,7 +98,7 @@ public class ProfileValidation {
     private String preferredMovies;
     private String sports;
     private String favoriteCuisine;
-    private String spokenLanguages;
+//    private String spokenLanguages;
     private String rasi;
     private String nakshatra;
     private String astroprofile;
@@ -115,4 +118,7 @@ public class ProfileValidation {
     @Digits(integer = 10, fraction = 0 , message = "Please enter a valid number Of whatsApp")
     private String whatsappUrl;
     private User user;
+
+    private List<Language> language;
+    private List<City> interestedCities;
 }

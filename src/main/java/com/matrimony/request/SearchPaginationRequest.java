@@ -25,5 +25,14 @@ public class SearchPaginationRequest {
     private Boolean active;
     private Integer per_page_record;
     private Integer page;
+    private String languageName;
+    private String minAnnualIncome;
+    private String maxAnnualIncome;
     private int gender;
+    private int minAge;
+    private int maxAge;
+    private String minHeight;
+    private String maxHeight;
+    private String minWeight;
+    private String maxWeight;
 }

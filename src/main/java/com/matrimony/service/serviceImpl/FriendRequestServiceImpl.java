@@ -12,6 +12,7 @@ import com.matrimony.request.SearchPaginationRequest;
 import com.matrimony.response.ApiResponse;
 import com.matrimony.response.UserFriendRequestProfileResponse;
 import com.matrimony.response.UserFriendRequestResponse;
+import com.matrimony.response.UserProfileFriendRequestResponse;
 import com.matrimony.service.FriendRequestService;
 import com.matrimony.validator.FriendRequestValidation;
 import com.matrimony.validator.SliderValidation;
@@ -242,19 +243,32 @@ public class FriendRequestServiceImpl  implements FriendRequestService {
             List<User> userEntities = userPage.getContent();
 
             //  Below code is when we are making any join to two tables. This will send user data along with its friend request data
-            List<UserFriendRequestResponse> responseList = new ArrayList<>();
+//            List<UserFriendRequestResponse> responseList = new ArrayList<>();
+
+            List<UserProfileFriendRequestResponse> responseList = new ArrayList<>();
 
             System.out.println("login profile--------------------" + currentUserProfile.getId());
             for (User parent : userEntities) {
                 FriendRequest children = friendRequestRepository.findBySenderIdORReceiverId(parent.getId(), currentUserProfile.getId());
 
-//      if friend request is already accepted than it will not show data of that corresponding user
+                Optional<Profile> childrenProfile = profileRepository.findByUserId(parent.getId());
+
+                //      if friend request is already accepted than it will not show data of that corresponding user
                 if (children != null && children.getStatus() ==1){
-                    UserFriendRequestResponse response = new UserFriendRequestResponse();
+                    UserProfileFriendRequestResponse response = new UserProfileFriendRequestResponse();
                     response.setUser(parent);
+                    response.setProfile(childrenProfile);
                     response.setFriendRequest(children);
                     responseList.add(response);
                 }
+
+//                if (children != null && children.getStatus() ==1){
+//                    UserFriendRequestResponse response = new UserFriendRequestResponse();
+//                    response.setUser(parent);
+//                    response.setFriendRequest(children);
+//                    responseList.add(response);
+//                }
+
 
             }
 

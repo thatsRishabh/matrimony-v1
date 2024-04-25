@@ -1,9 +1,8 @@
 package com.matrimony.service.serviceImpl;
 
-import com.matrimony.entity.FriendRequest;
-import com.matrimony.entity.Profile;
-import com.matrimony.entity.Slider;
-import com.matrimony.entity.User;
+import com.matrimony.entity.*;
+import com.matrimony.repository.CitySelectedRepository;
+import com.matrimony.repository.LanguageSelectedRepository;
 import com.matrimony.repository.ProfileRepository;
 import com.matrimony.repository.UserRepository;
 import com.matrimony.request.SearchPaginationRequest;
@@ -23,12 +22,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -38,6 +37,12 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    LanguageSelectedRepository languageSelectedRepository;
+
+    @Autowired
+    CitySelectedRepository citySelectedRepository;
 
     //   below method will by default create the timestamp
     @PrePersist
@@ -104,7 +109,7 @@ public class ProfileServiceImpl implements ProfileService {
             profile.setPreferredMovies(profileRequest.getPreferredMovies());
             profile.setSports(profileRequest.getSports());
             profile.setFavoriteCuisine(profileRequest.getFavoriteCuisine());
-            profile.setSpokenLanguages(profileRequest.getSpokenLanguages());
+//            profile.setSpokenLanguages(profileRequest.getSpokenLanguages());
             profile.setEducation(profileRequest.getEducation());
             profile.setProfession(profileRequest.getProfession());
             profile.setDiet(profileRequest.getDiet());
@@ -113,6 +118,27 @@ public class ProfileServiceImpl implements ProfileService {
             profile.setUser(profileRequest.getUser());
 
             Profile payload = this.profileRepository.save(profile);
+
+            // Save Language methods
+            List<Language> languages = profileRequest.getLanguage();
+            for (Language languageRequest : languages) {
+                LanguageSelected languageSelected= new LanguageSelected();
+                languageSelected.setProfile(profile);
+                languageSelected.setLanguage(languageRequest);
+                languageSelectedRepository.save(languageSelected);
+                System.out.println("inside the loop=======================");
+            }
+
+            // Save City methods
+            List<City>  cities= profileRequest.getInterestedCities();
+            for (City cityRequest : cities) {
+                CitySelected citySelected= new CitySelected();
+                citySelected.setProfile(profile);
+                citySelected.setCity(cityRequest);
+                citySelectedRepository.save(citySelected);
+                System.out.println("inside the loop=======================");
+            }
+
             return ResponseEntity.ok(new ApiResponse<>("success", "Profile added successfully", payload, 200));
         } catch (Exception e) {
             // Handle the exception here and log it
@@ -131,13 +157,34 @@ public class ProfileServiceImpl implements ProfileService {
 
             String city = searchParams.getCity();
             int gender = searchParams.getGender();
+            String minHeight = searchParams.getMinHeight();
+            String maxHeight = searchParams.getMaxHeight();
+            String maxWeight = searchParams.getMaxWeight();
+            String minWeight = searchParams.getMinWeight();
+            int minAge = searchParams.getMinAge();
+            int maxAge = searchParams.getMaxAge();
             String caste = searchParams.getCaste();
+            String minAnnualIncome = searchParams.getMinAnnualIncome();
+            String maxAnnualIncome = searchParams.getMaxAnnualIncome();
+            String languageName = searchParams.getLanguageName();
             Integer perPageRecord = searchParams.getPer_page_record();
 
             // Set the default value of page to 1
             Integer page = (searchParams.getPage() != null) ? searchParams.getPage() : 1;
 
             Page<Profile> profilePage;
+
+            // Calculate birth dates for minAge and maxAge
+            LocalDate today = LocalDate.now();
+            LocalDate minBirthDate = today.minusYears(maxAge);
+            LocalDate maxBirthDate = today.minusYears(minAge).plusDays(1); // Add one day to include the upper bound
+
+            // Convert LocalDate to Date
+            Date minBirthDateAsDate = Date.from(minBirthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date maxBirthDateAsDate = Date.from(maxBirthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            // Now you can use these Date objects in your query
+//            return profileRepository.findByDateOfBirthBetween(minBirthDateAsDate, maxBirthDateAsDate, pageable);
 
 
             // Get the current user's data from jwt token
@@ -155,8 +202,14 @@ public class ProfileServiceImpl implements ProfileService {
                     profilePage = Page.empty(); // No matching category found
                 }
             }
+            else if (gender != 0 && caste != null && religion != null && city != null && minHeight != null && maxHeight != null && minWeight != null && maxWeight != null) {
+                profilePage = profileRepository.findByUser_GenderAndCasteContainingAndReligionContainingAndPlaceOfBirthContainingAndHeightBetweenAndWeightBetweenAndUser_IdNot(gender, caste,religion,city,minHeight, maxHeight,minWeight, maxWeight,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
             else if (gender != 0 && caste != null && religion != null && city != null) {
                 profilePage = profileRepository.findByUser_GenderAndCasteContainingAndReligionContainingAndPlaceOfBirthContainingAndUser_IdNot(gender, caste,religion,city,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (minHeight != null && maxHeight != null && minWeight != null && maxWeight != null) {
+                profilePage = profileRepository.findByHeightBetweenAndWeightBetweenAndUser_IdNot(minHeight, maxHeight,minWeight, maxWeight,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
             else if (religion != null && caste != null) {
                 profilePage = profileRepository.findByCasteContainingAndReligionContainingAndUser_IdNot(caste, religion, currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
@@ -170,12 +223,27 @@ public class ProfileServiceImpl implements ProfileService {
             else if (gender != 0 && city != null) {
                 profilePage = profileRepository.findByUser_GenderAndPlaceOfBirthContainingAndUser_IdNot(gender, city,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
+            else if (minAge != 0 && maxAge != 0) {
+                profilePage = profileRepository.findByUser_DateOfBirthBetweenAndUser_IdNot(minBirthDateAsDate, maxBirthDateAsDate,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (minHeight != null && maxHeight != null) {
+                profilePage = profileRepository.findByHeightBetweenAndUser_IdNot(minHeight, maxHeight,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (minWeight != null && maxWeight != null) {
+                profilePage = profileRepository.findByWeightBetweenAndUser_IdNot(minWeight, maxWeight,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (minAnnualIncome != null && maxAnnualIncome != null) {
+                profilePage = profileRepository.findByAnnualIncomeBetweenAndUser_IdNot(minAnnualIncome, maxAnnualIncome,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
             else if (religion != null) {
                 profilePage = profileRepository.findByReligionContainingAndUser_IdNot(religion, currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
             else if (city != null) {
                 profilePage = profileRepository.findByPlaceOfBirthContainingAndUser_IdNot(city,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
+//            else if (spokenLanguages != null) {
+//                profilePage = profileRepository.findBySpokenLanguagesContainingAndUser_IdNot(spokenLanguages,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+//            }
             else if (gender != 0) {
                 profilePage = profileRepository.findByUser_GenderAndUser_IdNot(gender,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
@@ -189,15 +257,42 @@ public class ProfileServiceImpl implements ProfileService {
             else {
                 profilePage = profileRepository.findByIdNot(currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
             }
-            //  Below code is when we are making any join to two tables
+
+            //  Below code is when we are making any join to two tables and response sent contains array
             List<Profile> parents = profilePage.getContent();
+            List<Map<String, Object>> responseList = new ArrayList<>();
 
+            for (Profile parent : parents) {
 
+                Map<String, Object> response = new HashMap<>();
+                response.put("profile", parent);
 
+                List<LanguageSelected> children = languageSelectedRepository.findByProfileId(parent.getId());
+                List<Map<String, Object>> languageList = new ArrayList<>();
+                for (LanguageSelected language : children) {
+                    Map<String, Object> languageMap = new HashMap<>();
+//                    languageMap.put("languageName", language.getLanguage());
+                    languageMap.put("languageName", language.getLanguage().getName());
+                    languageList.add(languageMap);
+
+                }
+                response.put("languageList", languageList);
+
+                List<CitySelected> citySelecteds = citySelectedRepository.findByProfileId(parent.getId());
+                List<Map<String, Object>> cityList = new ArrayList<>();
+                for (CitySelected cities : citySelecteds) {
+                    Map<String, Object> languageMap = new HashMap<>();
+                    languageMap.put("cityName", cities.getCity().getName());
+                    cityList.add(languageMap);
+
+                }
+                response.put("interestedCities", cityList);
+                responseList.add(response);
+            }
 
             Map<String, Object> map = Map.of(
-                    "data", parents,
-//                    "data", responseList,
+//                    "data", parents,
+                    "data", responseList,
                     "totalElements", profilePage.getTotalElements(),
                     "currentPage", page,
                     "perPageRecord", perPageRecord,
@@ -213,6 +308,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     }
 
+//    below transactional annotation is must if you are deleting anything from database using PUT/POST/GET method
+//    when params contains data in from of array
+    @Transactional
     @Override
     public ResponseEntity<ApiResponse<Profile>> updateProfile(Long profileId, ProfileValidation profileRequest) {
         try {
@@ -272,7 +370,7 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedProfile.setPreferredMovies(profileRequest.getPreferredMovies());
                 updatedProfile.setSports(profileRequest.getSports());
                 updatedProfile.setFavoriteCuisine(profileRequest.getFavoriteCuisine());
-                updatedProfile.setSpokenLanguages(profileRequest.getSpokenLanguages());
+//                updatedProfile.setSpokenLanguages(profileRequest.getSpokenLanguages());
                 updatedProfile.setEducation(profileRequest.getEducation());
                 updatedProfile.setProfession(profileRequest.getProfession());
                 updatedProfile.setDiet(profileRequest.getDiet());
@@ -280,6 +378,30 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedProfile.setDateOfMarriage(profileRequest.getDateOfMarriage());
                 updatedProfile.setUser(profileRequest.getUser());
                 Profile payload = this.profileRepository.save(updatedProfile);
+
+                this.languageSelectedRepository.deleteByProfileId(profileId);
+
+                // Save Language methods
+                List<Language> languages = profileRequest.getLanguage();
+                for (Language languageRequest : languages) {
+                    LanguageSelected languageSelected= new LanguageSelected();
+                    languageSelected.setProfile(updatedProfile);
+                    languageSelected.setLanguage(languageRequest);
+                    languageSelectedRepository.save(languageSelected);
+                    System.out.println("inside the loop=======================");
+                }
+
+                this.citySelectedRepository.deleteByProfileId(profileId);
+                // Save City methods
+                List<City>  cities= profileRequest.getInterestedCities();
+                for (City cityRequest : cities) {
+                    CitySelected citySelected= new CitySelected();
+                    citySelected.setProfile(updatedProfile);
+                    citySelected.setCity(cityRequest);
+                    citySelectedRepository.save(citySelected);
+                    System.out.println("inside the loop=======================");
+                }
+
                 return ResponseEntity.ok(new ApiResponse<>("success", "Data updated successfully", payload, 200));
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -317,6 +439,10 @@ public class ProfileServiceImpl implements ProfileService {
         try {
             Optional<Profile> category = this.profileRepository.findById(profileId);
             if (category.isPresent()) {
+//                since city & language have profile as their primary key, hence deleting them first, same can also be done with cascade feature
+                this.languageSelectedRepository.deleteByProfileId(profileId);
+                this.citySelectedRepository.deleteByProfileId(profileId);
+
                 this.profileRepository.deleteById(profileId);
                 return ResponseEntity.ok(new ApiResponse<>("success", "Data deleted successfully", null, 200));
             } else {

@@ -10,6 +10,7 @@ import lombok.*;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 
 @Getter
@@ -84,7 +85,7 @@ public class Profile {
     private String preferredMovies;
     private String sports;
     private String favoriteCuisine;
-    private String spokenLanguages;
+//    private String spokenLanguages;
     private String rasi;
     private String nakshatra;
     private String astroprofile;
@@ -114,6 +115,9 @@ public class Profile {
     @ManyToOne(fetch = FetchType.EAGER)
 //    @JsonIgnore
     private User user;
+
+//    @OneToMany(mappedBy = "profile", fetch = FetchType.EAGER)
+//    private List<LanguageSelected> languageSelectedList;
 
 //    @ManyToOne(fetch = FetchType.EAGER)
 //    private CategoryEntity categoryEntity;
