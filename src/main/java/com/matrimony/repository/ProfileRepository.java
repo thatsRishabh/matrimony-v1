@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
@@ -18,11 +19,17 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
     public Page<Profile> findByUser_GenderAndCasteContainingAndReligionContainingAndPlaceOfBirthContainingAndHeightBetweenAndWeightBetweenAndUser_IdNot(int gender,String caste,String religion,String city,String minHeight, String maxHeight,String minWeight, String maxWeight, int id, Pageable pageable);
 
-//    below is to search inside any object findByCasteContainingAndUser_GenderAndUser_IdNot findByUser_GenderAndUser_IdNot
+//    below is to search inside any child object
 public Page<Profile> findByUser_GenderAndCasteContainingAndReligionContainingAndPlaceOfBirthContainingAndUser_IdNot(int gender,String caste,String religion,String city,int id, Pageable pageable);
     public Page<Profile> findByUser_GenderAndCasteContainingAndUser_IdNot(int gender,String caste,int id, Pageable pageable);
     public Page<Profile> findByUser_GenderAndReligionContainingAndUser_IdNot(int gender,String religion,int id, Pageable pageable);
     public Page<Profile> findByUser_GenderAndPlaceOfBirthContainingAndUser_IdNot(int gender,String city,int id, Pageable pageable);
+    public Page<Profile> findByUser_GenderAndUser_DateOfBirthBetweenAndUser_IdNot(int gender,Date minAge, Date maxAge,int id, Pageable pageable);
+
+    public Page<Profile> findByUser_GenderAndHeightBetweenAndUser_IdNot(int gender,String minHeight, String maxHeight,int id, Pageable pageable);
+    public Page<Profile> findByUser_GenderAndWeightBetweenAndUser_IdNot(int gender,String minWeight, String maxWeight,int id, Pageable pageable);
+    public Page<Profile> findByUser_GenderAndAnnualIncomeBetweenAndUser_IdNot(int gender,String minAnnualIncome, String maxAnnualIncome,int id, Pageable pageable);
+
 
     public Page<Profile> findByUser_GenderAndUser_IdNot(int gender,int id, Pageable pageable);
 
@@ -39,5 +46,9 @@ public Page<Profile> findByUser_GenderAndCasteContainingAndReligionContainingAnd
 
     public Page<Profile> findByHeightBetweenAndWeightBetweenAndUser_IdNot(String minHeight, String maxHeight,String minWeight, String maxWeight,int id, Pageable pageable);
 
+//    below is to search inside array
+    public Page<Profile> findByCitySelectedList_City_IdInAndUser_IdNot(List<Long> citySelectedList, int id, Pageable pageable);
+    public Page<Profile> findByLanguageSelectedList_language_IdInAndUser_IdNot(List<Long> languageSelectedList, int id, Pageable pageable);
+    public Page<Profile> findByCitySelectedList_City_IdInAndLanguageSelectedList_language_IdInAndUser_IdNot(List<Long> citySelectedList, List<Long> languageSelectedList, int id, Pageable pageable);
 //    public Page<Profile> findBySpokenLanguagesContainingAndUser_IdNot(String spokenLanguages, int id, Pageable pageable);
 }

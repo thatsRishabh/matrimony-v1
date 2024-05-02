@@ -26,6 +26,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public List<Role> getAllRoles() {
+//        System.out.println("here===========");
         try {
             return roleRepository.findAll();
         } catch (Exception e) {

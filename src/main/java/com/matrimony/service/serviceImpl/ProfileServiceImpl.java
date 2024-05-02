@@ -166,8 +166,10 @@ public class ProfileServiceImpl implements ProfileService {
             String caste = searchParams.getCaste();
             String minAnnualIncome = searchParams.getMinAnnualIncome();
             String maxAnnualIncome = searchParams.getMaxAnnualIncome();
-            String languageName = searchParams.getLanguageName();
+//            String languageName = searchParams.getLanguageName();
             Integer perPageRecord = searchParams.getPer_page_record();
+            List<Long> citySelectedList= searchParams.getCitySelectedList();
+            List<Long> languageSelectedList= searchParams.getLanguageSelectedList();
 
             // Set the default value of page to 1
             Integer page = (searchParams.getPage() != null) ? searchParams.getPage() : 1;
@@ -214,6 +216,18 @@ public class ProfileServiceImpl implements ProfileService {
             else if (religion != null && caste != null) {
                 profilePage = profileRepository.findByCasteContainingAndReligionContainingAndUser_IdNot(caste, religion, currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
+            else if (gender != 0 && minAge != 0 && maxAge != 0) {
+                profilePage = profileRepository.findByUser_GenderAndUser_DateOfBirthBetweenAndUser_IdNot(gender, minBirthDateAsDate, maxBirthDateAsDate,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (gender != 0 && minHeight != null && maxHeight != null) {
+                profilePage = profileRepository.findByUser_GenderAndHeightBetweenAndUser_IdNot(gender, minHeight, maxHeight,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (gender != 0 && minWeight != null && maxWeight != null) {
+                profilePage = profileRepository.findByUser_GenderAndWeightBetweenAndUser_IdNot(gender, minWeight, maxWeight,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (gender != 0 && minAnnualIncome != null && maxAnnualIncome != null) {
+                profilePage = profileRepository.findByUser_GenderAndAnnualIncomeBetweenAndUser_IdNot(gender, minAnnualIncome, maxAnnualIncome,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
             else if (gender != 0 && caste != null) {
                 profilePage = profileRepository.findByUser_GenderAndCasteContainingAndUser_IdNot(gender, caste,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
@@ -223,6 +237,7 @@ public class ProfileServiceImpl implements ProfileService {
             else if (gender != 0 && city != null) {
                 profilePage = profileRepository.findByUser_GenderAndPlaceOfBirthContainingAndUser_IdNot(gender, city,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
+
             else if (minAge != 0 && maxAge != 0) {
                 profilePage = profileRepository.findByUser_DateOfBirthBetweenAndUser_IdNot(minBirthDateAsDate, maxBirthDateAsDate,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
@@ -251,8 +266,15 @@ public class ProfileServiceImpl implements ProfileService {
             else if (caste != null) {
                 profilePage = profileRepository.findByCasteContainingAndUser_IdNot(caste,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
             }
-
-
+            else if (citySelectedList != null && languageSelectedList != null) {
+                profilePage = profileRepository.findByCitySelectedList_City_IdInAndLanguageSelectedList_language_IdInAndUser_IdNot(citySelectedList, languageSelectedList ,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (citySelectedList != null) {
+                profilePage = profileRepository.findByCitySelectedList_City_IdInAndUser_IdNot(citySelectedList,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
+            else if (languageSelectedList != null) {
+                profilePage = profileRepository.findByLanguageSelectedList_language_IdInAndUser_IdNot(languageSelectedList,currentUserProfile.getId(), PageRequest.of(page - 1, perPageRecord, Sort.by(Sort.Order.desc("id"))));
+            }
 
             else {
                 profilePage = profileRepository.findByIdNot(currentUserProfile.getId(),PageRequest.of(page - 1, perPageRecord,Sort.by(Sort.Order.desc("id"))));
@@ -260,39 +282,39 @@ public class ProfileServiceImpl implements ProfileService {
 
             //  Below code is when we are making any join to two tables and response sent contains array
             List<Profile> parents = profilePage.getContent();
-            List<Map<String, Object>> responseList = new ArrayList<>();
-
-            for (Profile parent : parents) {
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("profile", parent);
-
-                List<LanguageSelected> children = languageSelectedRepository.findByProfileId(parent.getId());
-                List<Map<String, Object>> languageList = new ArrayList<>();
-                for (LanguageSelected language : children) {
-                    Map<String, Object> languageMap = new HashMap<>();
-//                    languageMap.put("languageName", language.getLanguage());
-                    languageMap.put("languageName", language.getLanguage().getName());
-                    languageList.add(languageMap);
-
-                }
-                response.put("languageList", languageList);
-
-                List<CitySelected> citySelecteds = citySelectedRepository.findByProfileId(parent.getId());
-                List<Map<String, Object>> cityList = new ArrayList<>();
-                for (CitySelected cities : citySelecteds) {
-                    Map<String, Object> languageMap = new HashMap<>();
-                    languageMap.put("cityName", cities.getCity().getName());
-                    cityList.add(languageMap);
-
-                }
-                response.put("interestedCities", cityList);
-                responseList.add(response);
-            }
+//            List<Map<String, Object>> responseList = new ArrayList<>();
+//
+//            for (Profile parent : parents) {
+//
+//                Map<String, Object> response = new HashMap<>();
+//                response.put("profile", parent);
+//
+//                List<LanguageSelected> children = languageSelectedRepository.findByProfileId(parent.getId());
+//                List<Map<String, Object>> languageList = new ArrayList<>();
+//                for (LanguageSelected language : children) {
+//                    Map<String, Object> languageMap = new HashMap<>();
+////                    languageMap.put("languageName", language.getLanguage());
+//                    languageMap.put("languageName", language.getLanguage().getName());
+//                    languageList.add(languageMap);
+//
+//                }
+//                response.put("languageList", languageList);
+//
+//                List<CitySelected> citySelecteds = citySelectedRepository.findByProfileId(parent.getId());
+//                List<Map<String, Object>> cityList = new ArrayList<>();
+//                for (CitySelected cities : citySelecteds) {
+//                    Map<String, Object> languageMap = new HashMap<>();
+//                    languageMap.put("cityName", cities.getCity().getName());
+//                    cityList.add(languageMap);
+//
+//                }
+//                response.put("interestedCities", cityList);
+//                responseList.add(response);
+//            }
 
             Map<String, Object> map = Map.of(
-//                    "data", parents,
-                    "data", responseList,
+                    "data", parents,
+//                    "data", responseList,
                     "totalElements", profilePage.getTotalElements(),
                     "currentPage", page,
                     "perPageRecord", perPageRecord,
@@ -439,9 +461,6 @@ public class ProfileServiceImpl implements ProfileService {
         try {
             Optional<Profile> category = this.profileRepository.findById(profileId);
             if (category.isPresent()) {
-//                since city & language have profile as their primary key, hence deleting them first, same can also be done with cascade feature
-                this.languageSelectedRepository.deleteByProfileId(profileId);
-                this.citySelectedRepository.deleteByProfileId(profileId);
 
                 this.profileRepository.deleteById(profileId);
                 return ResponseEntity.ok(new ApiResponse<>("success", "Data deleted successfully", null, 200));

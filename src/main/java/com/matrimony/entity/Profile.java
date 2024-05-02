@@ -11,6 +11,7 @@ import lombok.*;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 @Getter
@@ -116,8 +117,12 @@ public class Profile {
 //    @JsonIgnore
     private User user;
 
-//    @OneToMany(mappedBy = "profile", fetch = FetchType.EAGER)
-//    private List<LanguageSelected> languageSelectedList;
+
+    @OneToMany(mappedBy = "profile"  , fetch = FetchType.EAGER , cascade = CascadeType.ALL)
+    private List<LanguageSelected> languageSelectedList;
+
+    @OneToMany(mappedBy = "profile"  , fetch = FetchType.EAGER , cascade = CascadeType.ALL)
+    private List<CitySelected> citySelectedList;
 
 //    @ManyToOne(fetch = FetchType.EAGER)
 //    private CategoryEntity categoryEntity;

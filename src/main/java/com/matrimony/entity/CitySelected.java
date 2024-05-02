@@ -1,6 +1,8 @@
 package com.matrimony.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.matrimony.service.serviceImpl.CitySelectedServiceImpl;
 import com.matrimony.service.serviceImpl.LanguageServiceImpl;
 import jakarta.persistence.*;
@@ -21,9 +23,24 @@ public class CitySelected {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-//    @JsonIgnore
+//    @ManyToOne(fetch = FetchType.EAGER)
+////    @JsonIgnore
+//    private Profile profile;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "profile_id")
     private Profile profile;
+
+    //    below two blocks allow to save parent id but doesn't show json when data is retived from data base,
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Ignore during deserialization (when receiving JSON data)
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
 
     @ManyToOne(fetch = FetchType.EAGER)
 //    @JsonIgnore

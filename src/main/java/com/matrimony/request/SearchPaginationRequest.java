@@ -1,8 +1,11 @@
 package com.matrimony.request;
 
+import com.matrimony.entity.City;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -35,4 +38,6 @@ public class SearchPaginationRequest {
     private String maxHeight;
     private String minWeight;
     private String maxWeight;
+    private List<Long> citySelectedList;
+    private List<Long> languageSelectedList;
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/roles")
-@PreAuthorize("hasRole('ADMIN')")
+//@PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
 
 
@@ -28,6 +28,7 @@ public class RoleController {
     // get all roles
     @GetMapping("/getAllRoles")
     public List<Role> getAllRoles() {
+        System.out.println("here===========");
         return roleService.getAllRoles();
 
     }
